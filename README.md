@@ -1,5 +1,6 @@
 # M-ngelmelder-Konstanz
 DLBDSEDA02_D Data Analysis Aufgabe Nr. 1
+<<<<<<< HEAD
 
 ## Kurz: Commit-Anleitung für `stopwords_de.txt`
 
@@ -12,3 +13,5 @@ git push
 ```
 
 Optional: Passe die Commit-Nachricht an deine Konvention an.
+=======
+>>>>>>> origin/main
