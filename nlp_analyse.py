@@ -1,193 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-NLP-Analyse von Bürgerbeschwerden für die Stadt Konstanz
-Aufgabe: Textanalyse zur Themenestraktion
-"""
-
-import re
-import sys
-import csv
-from collections import Counter
-
-# Versuche optionale Bibliotheken zu importieren; falls nicht vorhanden,
-# arbeiten wir mit Fallbacks auf der Standardbibliothek.
-HAS_PANDAS = False
-HAS_NLTK = False
-HAS_SKLEARN = False
-HAS_GENSIM = False
-
-try:
-    import pandas as pd
-    HAS_PANDAS = True
-except ImportError:
-    HAS_PANDAS = False
-
-try:
-    import nltk
-    from nltk.corpus import stopwords
-    from nltk.stem import WordNetLemmatizer
-    HAS_NLTK = True
-except ImportError:
-    HAS_NLTK = False
-
-try:
-    from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-    from sklearn.decomposition import LatentDirichletAllocation
-    HAS_SKLEARN = True
-except ImportError:
-    HAS_SKLEARN = False
-
-try:
-    from gensim import corpora
-    from gensim.models import LdaModel
-    HAS_GENSIM = True
-except ImportError:
-    HAS_GENSIM = False
+"""Legacy entrypoint — ruft `main.run()` auf."""
+from main import run
 
 
-def load_data_from_csv(filepath):
-    """Laden der Daten aus CSV-Datei."""
-    texts = []
-    
-    if HAS_PANDAS:
-        try:
-            # Versuche CSV-Format mit Komma als Separator
-            df = pd.read_csv(filepath, sep=',', quotechar='"', dtype=str)
-            # Spalte mit Index 2 (3. Spalte) enthält die Beschwerdentexte
-            if len(df.columns) > 2:
-                texts = df.iloc[:, 2].dropna().astype(str).tolist()
-            else:
-                print(f"Warnung: Datei hat weniger als 3 Spalten")
-        except Exception as e:
-            print(f"Fehler beim Laden mit pandas: {e}")
-            # Fallback auf csv-Modul
-            texts = load_data_csv_module(filepath)
-    else:
-        texts = load_data_csv_module(filepath)
-    
-    return texts
-
-
-def load_data_csv_module(filepath):
-    """Fallback: Daten mit csv-Modul laden."""
-    texts = []
-    try:
-        with open(filepath, newline='', encoding='utf-8') as f:
-            reader = csv.reader(f, delimiter=',', quotechar='"')
-            for i, row in enumerate(reader):
-                if len(row) > 2:
-                    text = row[2].strip()
-                    if text:  # Nur nicht-leere Texte
-                        texts.append(text)
-    except FileNotFoundError:
-        print(f"Fehler: Datei '{filepath}' nicht gefunden.")
-    except Exception as e:
-        print(f"Fehler beim CSV-Lesen: {e}")
-    
-    return texts
-
-
-# 2. Daten laden
-print("Lade Daten...")
-texts = load_data_from_csv('beispieldaten.csv')
-print(f"Geladen: {len(texts)} Texte\n")
-
-# 3. NLTK-Ressourcen und Stopwörter vorbereiten
-print("Initialisiere Vorverarbeitung...")
-
-def load_local_stopwords(path='stopwords_de.txt'):
-    """Lade lokale Stopwort-Liste aus Datei.
-
-    Rückgabe: (set(single_words), list(phrase_stopwords)) oder None
-    - Kommentare (Zeilen, die mit '#') werden ignoriert
-    - Normalisiert auf NFC, kleingeschrieben
-    - Trennt einwortige Stopwörter und mehrwortige Phrasen
-    """
-    try:
-        import unicodedata
-        with open(path, encoding='utf-8') as f:
-            raw = [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith('#')]
-        normalized = [unicodedata.normalize('NFC', ln).lower() for ln in raw]
-        single = set()
-        phrases = []
-        for w in normalized:
-            if ' ' in w:
-                # collapse multiple spaces
-                phrases.append(re.sub(r'\s+', ' ', w).strip())
-            else:
-                single.add(w)
-        return single, phrases
-    except Exception:
-        return None
-if HAS_NLTK:
-    def ensure_nltk_resources():
-        """Stellt sicher, dass benötigte NLTK-Ressourcen vorhanden sind."""
-        resources = ['stopwords', 'wordnet', 'punkt']
-        for res in resources:
-            try:
-                nltk.data.find(f'tokenizers/{res}' if res == 'punkt' else f'corpora/{res}')
-            except LookupError:
-                try:
-                    nltk.download(res, quiet=True)
-                except Exception as e:
-                    print(f"Warnung: Konnte {res} nicht laden: {e}")
-
-    ensure_nltk_resources()
-
-    # Stopwörter: zuerst lokale Datei prüfen, sonst NLTK verwenden
-    local_sw = load_local_stopwords()
-    if local_sw is not None:
-        stop_words, stop_phrases = local_sw
-    else:
-        try:
-            stop_words = set(stopwords.words('german'))
-        except Exception:
-            try:
-                nltk.download('stopwords', quiet=True)
-                stop_words = set(stopwords.words('german'))
-            except Exception:
-                stop_words = set()
-        stop_phrases = []
-
-    # Lemmatizer
-    class _IdentityLemmatizer:
-        """Fallback Lemmatizer für Deutsch"""
-        def lemmatize(self, w, pos='n'):
-            return w
-
-    lemmatizer = _IdentityLemmatizer()
-else:
-    # Falls vorhanden, lokale Stopwörter laden
-    local_sw = load_local_stopwords()
-    if local_sw is not None:
-        stop_words, stop_phrases = local_sw
-    else:
-        # Minimaler deutscher Stopwortsatz als Fallback
-        stop_words = set([
-            "und", "der", "die", "das", "ein", "eine", "in", "auf", "mit", "für",
-            "ist", "sind", "bei", "zu", "von", "an", "dem", "den", "des", "denen",
-            "aber", "oder", "nicht", "kann", "auch", "so", "wie", "über", "vor"
-        ])
-        stop_phrases = []
-
-
-def preprocess_text(text):
-    """Vorverarbeitung der Texte, um 'saubere Texte' zu erhalten."""
-    if not isinstance(text, str):
-        return ""
-    import unicodedata
-    # 1. Normalisieren + Kleinbuchstaben
-    text = unicodedata.normalize('NFC', text).lower()
-    # 2. Entferne mehrwortige Stopphrasen vor der Tokenisierung
-    try:
-        for phrase in stop_phrases:
-            # ganze Phrase als Wortgrenze ersetzen
-            text = re.sub(r"\b" + re.escape(phrase) + r"\b", ' ', text)
-    except Exception:
-        pass
-    # 3. Entfernung von Sonderzeichen (behalte aber Umlaute)
-    text = re.sub(r"[^a-zäöüß\s]", ' ', text)
+if __name__ == '__main__':
+    import sys
+    path = sys.argv[1] if len(sys.argv) > 1 else 'maengelmelder_konstanz.csv'
+    sys.exit(run(path))
     # 4. Tokenisierung
     tokens = text.split()
     # 5. Entfernung von Stoppwörtern und zu kurze Wörter
@@ -202,7 +22,7 @@ clean_texts = [t for t in clean_texts if t.strip()]  # Leere Texte entfernen
 print(f"Bereinigt: {len(clean_texts)} Texte\n")
 
 if len(clean_texts) == 0:
-    print("Fehler: Keine Texte zum Verarbeiten. Bitte prüfe die Datei 'beispieldaten.csv'")
+    print("Fehler: Keine Texte zum Verarbeiten. Bitte prüfe die Datei 'maengelmelder_konstanz.csv'")
     sys.exit(1)
 
 

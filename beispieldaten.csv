@@ -1,6 +1,6 @@
-id,"date_created","text_raw","category_parent","category_child","responsible","lat","lon","address_input","detail_url"	
-2452795,"2026-01-02","Im Bereich des Stromkastens der SWK liegen Glassplitter.","Muell/Sauberkeit","verschmutzte Strassen und Plaetze","Technische Betriebe","47.6687","9.1968","keine (autom. ermittelt: Richard-Wagner-Strasse 9, 78464 Konstanz, Germany","https://konstanz-mitgestalten.de/bms/2452795"	
-2452787,"2026-01-02","Im Bereich der Bushaltestelle Rosenau stadteinwaerts sowie auf dem angrenzenden Fahrrad- und Fussweg liegen Glassplitter.","Muell/Sauberkeit","verschmutzte Strassen und Plaetze","Technische Betriebe","47.667","9.199","keine (autom. ermittelt: Rosenau, 78464 Konstanz, Germany","https://konstanz-mitgestalten.de/bms/2452787"	
+# DEPRECATED: Inhalt wurde nach 'maengelmelder_konstanz.csv' verschoben.
+# Bitte entferne / lösche diese Datei nach dem Commit, sie bleibt derzeit aus Kompatibilitätsgründen erhalten.
+
 2452357,"2026-01-02","In der Strasse Im Weinberg sind mehrere Strassenlaternen defekt: die Nummern 6,7 und 8.","Beleuchtung","Strassenlaternen defekt","Stadtwerke Konstanz","47.6757","9.1948","keine (autom. ermittelt: Elblingweg 12, 78464 Konstanz, Germany","https://konstanz-mitgestalten.de/bms/2452357"	
 2451859,"2026-01-02","Boeller im Wechselgeldfach","Strassen, Fahrrad & Verkehr","Parkscheinautomat defekt","Technische Betriebe","47.6701","9.182","keine (autom. ermittelt: Theodor-Heuss-Strasse 25, 78467 Konstanz, Germany","https://konstanz-mitgestalten.de/bms/2451859"	
 2451409,"2026-01-01","Sehr geehrte Damen und Herren,in der Brandesstrasse an der Kreuzung  in Naehe von Haus 21 ist Laterne Nr.18 defekt.Bitte um schnellstmoegliche Reparatur, da gefaehrliche Stelle an Kreuzung.Vielen Dank","Beleuchtung","Strassenlaternen defekt","Stadtwerke Konstanz","47.6731","9.1948","keine (autom. ermittelt: Brandesstrasse 21, 78464 Konstanz, Deutschland","https://konstanz-mitgestalten.de/bms/2451409"	
