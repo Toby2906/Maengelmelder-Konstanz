@@ -6,7 +6,7 @@ from nlp.preprocess import prepare_stopwords_and_lemmatizer, preprocess_text
 from nlp.topics import vectorize_texts, extract_topics_lda, extract_ngrams, top_words
 
 
-def run(filepath='maengelmelder_konstanz.csv', num_topics=5):
+def run(filepath='data/maengelmelder_konstanz.csv', num_topics=5):
     print("Lade Daten...")
     texts = load_data_from_csv(filepath)
     print(f"Geladen: {len(texts)} Texte\n")
@@ -50,7 +50,7 @@ def run(filepath='maengelmelder_konstanz.csv', num_topics=5):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='NLP-Analyse: Lade CSV, preprocess, extrahiere Themen')
-    parser.add_argument('input', nargs='?', default='maengelmelder_konstanz.csv', help='Pfad zur CSV-Datei (default: maengelmelder_konstanz.csv)')
+    parser.add_argument('input', nargs='?', default='data/maengelmelder_konstanz.csv', help='Pfad zur CSV-Datei (default: data/maengelmelder_konstanz.csv)')
     parser.add_argument('-t', '--topics', type=int, default=5, help='Anzahl Themen für LDA')
     args = parser.parse_args()
     sys.exit(run(args.input, num_topics=args.topics))

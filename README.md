@@ -1,123 +1,117 @@
 # Maengelmelder-Konstanz
 
-Beispielprojekt zur Analyse von Bürgerbeschwerden.
+NLP-Analyse von Bürgerbeschwerden aus Konstanz.
 
-Neu: Das Skript wurde in mehrere Module aufgeteilt, um die Wartbarkeit zu verbessern:
+## Projektstruktur
 
-- `main.py`      : Orchestriert den Ablauf (Laden → Vorverarbeitung → Themen)
-- `fetch.py`     : Funktionen zum Laden von Daten (CSV-Fallback und pandas)
-- `preprocess.py`: Stopwörter, Vorverarbeitung und Hilfsfunktionen
-- `topics.py`    : Vektorisierung und Themen-/N-Gramm-Analysen
-- `utils.py`     : Feature-Flags für optionale Bibliotheken und kleine Helfer
+```
+Maengelmelder-Konstanz/
+├── README.md                         # Dieses Dokument
+├── LICENSE                           # Lizenz
+├── requirements.txt                  # Python-Abhängigkeiten
+├── .gitignore                        # Git-Einstellungen
+├── .flake8                           # Linting-Konfiguration
+├── .coveragerc                       # Code-Coverage-Konfiguration
+├── .github/
+│   └── workflows/
+│       └── ci.yml                    # GitHub Actions Workflow
+├── data/
+│   └── maengelmelder_konstanz.csv    # Eingangsdaten (CSV)
+├── nlp/                              # Python-Paket
+│   ├── __init__.py
+│   ├── fetch.py                      # CSV-Lader
+│   ├── preprocess.py                 # Vorverarbeitung
+│   ├── topics.py                     # Topic-Extraktion
+│   └── utils.py                      # Hilfsfunktionen
+├── main.py                           # Einstiegspunkt
+├── nlp_analyse.py                    # Legacy-Einstiegspunkt
+├── stopwords_de.txt                  # Deutsche Stoppwörter
+├── scripts/                          # Zusätzliche Skripte
+└── tests/
+    ├── __init__.py
+    └── test_preprocess.py            # Unit-Tests
+```
 
-Einfacher Start:
+## Schnellstart
+
+### Installation
 
 ```bash
+# Virtual Environment
+python3 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate  # Windows
+
+# Abhängigkeiten installieren
+pip install -r requirements.txt
+```
+
+### Ausführung
+
+```bash
+# Standard (verwendet data/maengelmelder_konstanz.csv)
+python3 main.py
+
+# Mit Custom-Datenpfad und 7 Themen
+python3 main.py path/to/data.csv -t 7
+
+# Legacy-Einstiegspunkt
 python3 nlp_analyse.py
 ```
 
-Hinweis:
-- Wenn du `scikit-learn`, `pandas` oder `nltk` installiert hast, nutzt das Programm diese Bibliotheken automatisch für bessere Ergebnisse.
-- Die Datei `maengelmelder_konstanz.csv` wird standardmäßig geladen. Du kannst einen anderen Pfad als Argument an `main.py` übergeben.
+## Module
 
-Beispiel (einen anderen CSV-Pfad verwenden):
+| Datei | Funktion |
+|-------|----------|
+| `nlp/fetch.py` | CSV-Lader mit pandas-Fallback |
+| `nlp/preprocess.py` | Stopwörter, Tokenisierung, Lemmatisierung |
+| `nlp/topics.py` | Vektorisierung (Count/TF-IDF), LDA, N-Gramme |
+| `nlp/utils.py` | Feature-Flags für optionale Libraries |
 
-```bash
-python3 main.py data/meine_daten.csv
-```
-
-Konflikt-Hinweis: Diese Repository-Historie wurde mit dem Remote zusammengeführt. Falls du Probleme beim Push/Pull hast, siehe die Git-Anweisungen im Projekt-Root.
-
-Weitere Hinweise zur Modulentrennung findest du in den Dateien selbst.
-# M-ngelmelder-Konstanz
-DLBDSEDA02_D Data Analysis Aufgabe Nr. 1
-<<<<<<< HEAD
-
-## Kurz: Commit-Anleitung für `stopwords_de.txt`
-
-Falls du die alphabetisch sortierte Stopwortliste ins Git-Repository übernehmen möchtest, führe lokal im Projektordner folgende Befehle aus:
-
-```bash
-git add stopwords_de.txt
-git commit -m "Add alphabetically sorted German stopwords list"
-git push
-```
-
-Optional: Passe die Commit-Nachricht an deine Konvention an.
-=======
-# Maengelmelder-Konstanz
-
-Beispielprojekt zur Analyse von Bürgerbeschwerden.
-
-Dieses Repository enthält ein kleines NLP-Toolkit zum Einlesen von CSV-Daten, zur Vorverarbeitung und zur Themenextraktion.
-
-Schnellstart
------------
-
-```bash
-python3 nlp_analyse.py
-# oder mit eigenem Pfad und 7 Themen:
-python3 main.py data/meine_daten.csv -t 7
-```
-
-Paketstruktur (`nlp/`)
-----------------------
-
-Die wichtigsten Module:
-
-- `nlp/fetch.py` — CSV-Lader mit Pandas-Fallback (`load_data_from_csv(filepath)`)
-- `nlp/preprocess.py` — Stopwort-Lader und `preprocess_text(text, stop_words, stop_phrases)`
-- `nlp/topics.py` — Vektorisierung, LDA-Topic-Extraction und N‑Gram-Analyse
-- `nlp/utils.py` — Feature-Flags (`HAS_PANDAS`, `HAS_SKLEARN`, ...)
-
-Beispiel (Programmierschnittstelle):
+### Code-Beispiel
 
 ```python
 from nlp.fetch import load_data_from_csv
 from nlp.preprocess import prepare_stopwords_and_lemmatizer, preprocess_text
 from nlp.topics import vectorize_texts, extract_topics_lda
 
-texts = load_data_from_csv('maengelmelder_konstanz.csv')
+texts = load_data_from_csv('data/maengelmelder_konstanz.csv')
 stop_words, stop_phrases, _ = prepare_stopwords_and_lemmatizer()
 clean = [preprocess_text(t, stop_words, stop_phrases) for t in texts]
 count_matrix, *_ = vectorize_texts(clean)
-topics = extract_topics_lda(count_matrix, None, num_topics=5)
+topics = extract_topics_lda(count_matrix, num_topics=5)
 ```
 
-Dependencies
-------------
-
-Optional (für bessere Ergebnisse): `pandas`, `scikit-learn`, `nltk`, `gensim`. Eine Übersicht ist in `requirements.txt` enthalten.
-
-Continuous Integration (CI)
---------------------------
-
-Ein GitHub Actions Workflow wurde hinzugefügt unter `.github/workflows/ci.yml`. Er installiert Abhängigkeiten aus `requirements.txt` und führt `pytest` für Pull Requests und Pushes auf `main` aus.
-
-Tests
------
-
-Ein einfacher Test mit `pytest` liegt unter `tests/test_preprocess.py`. Führe sie lokal mit:
+## Testing & Linting
 
 ```bash
-pytest -q
-```
+# Tests ausführen
+pytest -v
 
-Weitere Hinweise
----------------
+# Mit Code-Coverage
+pytest --cov=nlp --cov-report=html
 
-- Bei Merge-Konflikten (z. B. beim README) haben wir die Datei bereinigt und die Paketstruktur dokumentiert.
-- Wenn du möchtest, richte ich noch GitHub Actions für Linting oder Coverage ein.
-
-Linting & Coverage
-------------------
-
-Die CI wurde erweitert: der Workflow führt jetzt `flake8` zur statischen Prüfung aus und läuft `pytest` mit Coverage. Die Coverage-XML wird als Artefakt an den CI-Lauf angehängt.
-
-Lokaler Check:
-
-```bash
-pip install -r requirements.txt
+# Linting mit flake8
 flake8
-pytest --cov=nlp
 ```
+
+## CI/CD
+
+GitHub Actions Workflow unter [.github/workflows/ci.yml](.github/workflows/ci.yml):
+- Installiert Dependencies
+- Führt pytest aus
+- Lädt Coverage-Report als Artefakt
+
+## Abhängigkeiten
+
+Optional (automatische Erkennung):
+- `pandas` — besseres CSV-Handling
+- `scikit-learn` — Vektorisierung & LDA
+- `nltk` — Tokenisierung & Lemmatisierung
+- `gensim` — Alternative Topic-Modellierung
+
+Siehe [requirements.txt](requirements.txt).
+
+---
+
+**Hinweis:** Alte Dateien im Root-Verzeichnis (`fetch.py`, `preprocess.py`, `topics.py`, `utils.py`, `beispieldaten.csv`) sind veraltet und können gelöscht werden.
