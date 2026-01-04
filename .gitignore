@@ -44,9 +44,15 @@ htmlcov/
 *~
 .DS_Store
 
-# Old/deprecated files (delete these)
-fetch.py
-preprocess.py
-topics.py
-utils.py
-beispieldaten.csv
+# Deprecated/Backup (entries kept for reference if files reappear)
+# .backup/        # Removed
+# fetch.py        # Removed
+# preprocess.py   # Removed
+# topics.py       # Removed
+# utils.py        # Removed
+# beispieldaten.csv  # Removed - use data/maengelmelder_konstanz.csv
+# scripts/        # Removed
+
+# Do not track generated CSV in root (use data/ directory instead)
+maengelmelder_konstanz.csv
+README_NEW.md
