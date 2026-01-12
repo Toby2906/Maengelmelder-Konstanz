@@ -216,3 +216,70 @@ python -m http.server 8000 -d out
 
 **Hinweis zu Logs**
 - Temporäre Laufprotokolle wie `run.log` wurden entfernt, damit das Repository sauber bleibt.
+
+## Letzte Änderungen
+
+- `out/view_pyldavis.ipynb` hinzugefügt: Notebook zum Einbetten und Anzeigen von `out/pyldavis_lda.html`.
+- `src/topics.py` erweitert: pyLDAvis wird jetzt auch per Fallback vorbereitet, falls `pyLDAvis.sklearn` nicht verfügbar ist.
+- Temporäre `run.log`-Dateien werden nicht im Repository belassen (gelöscht).
+
+## Fehlerbehebung / Hinweise
+
+- Falls bei `pip install` Probleme auftreten (z. B. "Failed to build 'sklearn'" auf neueren Python-Versionen), nutze eine Conda-Umgebung mit `python=3.11` oder installiere `scikit-learn` über `conda`/`mamba` aus `conda-forge`:
+
+```bash
+mamba create -n mm-nlp python=3.11 -c conda-forge scikit-learn pyLDAvis matplotlib wordcloud spacy pandas
+conda activate mm-nlp
+python -m spacy download de_core_news_sm
+```
+
+- Alternativ kann `pyLDAvis` aktualisiert werden; falls `pyLDAvis.sklearn` fehlt, nutzt das Projekt jetzt einen internen Fallback, der trotzdem eine `pyldavis_lda.html` erzeugen sollte.
+
+Wenn du möchtest, passe ich die README noch weiter an (z. B. Troubleshooting-Abschnitt erweitern). 
+
+Praktische Schritte bei Installationsproblemen
+
+- Schnelle Pip‑Fixes (erst versuchen):
+
+```bash
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install scikit-learn    # bevorzugt: fertige Wheel-Version
+python -m pip install --upgrade pyLDAvis
+```
+
+- Falls Pip versucht, `scikit-learn` zu kompilieren (Fehler auf neueren Python-Versionen), installiere systemseitige Build-Tools (Debian/Ubuntu):
+
+```bash
+sudo apt update && sudo apt install build-essential python3-dev gfortran libopenblas-dev liblapack-dev
+```
+
+- Empfehlung: Verwende `conda`/`mamba` für wissenschaftliche Pakete, das vermeidet viele Build-Probleme:
+
+```bash
+mamba create -n mm-nlp python=3.11 -c conda-forge scikit-learn pyLDAvis matplotlib wordcloud spacy pandas
+conda activate mm-nlp
+python -m spacy download de_core_news_sm
+```
+
+- Falls `pyLDAvis.sklearn` weiterhin fehlt, prüfe lokal mit:
+
+```bash
+python - <<'PY'
+import pyLDAvis
+try:
+    import pyLDAvis.sklearn
+    print('pyLDAvis.sklearn verfügbar')
+except Exception as e:
+    print('Fehler:', e)
+PY
+```
+
+Git-Commit der Änderungen
+
+```bash
+git add README.md out/view_pyldavis.ipynb src/topics.py
+git commit -m "docs: erweitere Troubleshooting; füge pyLDAvis-Notebook und Fallback hinzu"
+git push origin main
+```
+
+Wenn du möchtest, übernehme ich auch einen erweiterten Troubleshooting-Abschnitt mit typischen Fehlermeldungen und Lösungen.
