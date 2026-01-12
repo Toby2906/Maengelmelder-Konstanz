@@ -32,36 +32,55 @@ def prepare_stopwords_and_lemmatizer():
     nicht verfügbar ist, wird ein Identity-Lemmatizer zurückgegeben.
     """
     stop_words, stop_phrases = load_local_stopwords()
+
+    # Prefer spaCy lemmatizer if available
     try:
-        import nltk
+        import spacy
         try:
-            from nltk.corpus import stopwords
-            try:
-                if not stop_words:
-                    stop_words = set(stopwords.words('german'))
-            except Exception:
-                pass
-        except Exception:
-            pass
+            nlp = spacy.load('de_core_news_sm', exclude=['parser', 'ner'])
 
-        try:
-            from nltk.stem import SnowballStemmer
-            stemmer = SnowballStemmer('german')
-
-            class _StemmerWrapper:
+            class _SpacyLemmatizer:
                 def lemmatize(self, w, pos='n'):
                     try:
-                        return stemmer.stem(w)
+                        doc = nlp(w)
+                        if len(doc) > 0:
+                            return doc[0].lemma_
+                        return w
                     except Exception:
                         return w
 
-            lemmatizer = _StemmerWrapper()
+            lemmatizer = _SpacyLemmatizer()
             return stop_words, stop_phrases, lemmatizer
         except Exception:
+            # spaCy present but model not installed; fall through to NLTK
             pass
     except Exception:
         pass
 
+    # Next try NLTK Snowball stemmer
+    try:
+        from nltk.stem import SnowballStemmer
+        from nltk.corpus import stopwords
+        try:
+            if not stop_words:
+                stop_words = set(stopwords.words('german'))
+        except Exception:
+            pass
+        stemmer = SnowballStemmer('german')
+
+        class _StemmerWrapper:
+            def lemmatize(self, w, pos='n'):
+                try:
+                    return stemmer.stem(w)
+                except Exception:
+                    return w
+
+        lemmatizer = _StemmerWrapper()
+        return stop_words, stop_phrases, lemmatizer
+    except Exception:
+        pass
+
+    # Fallback Identity
     class _IdentityLemmatizer:
         def lemmatize(self, w, pos='n'):
             return w

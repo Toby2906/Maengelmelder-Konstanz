@@ -1,3 +1,0 @@
-# Stopwortdatei wurde nach 'Stoppwörter/stopwords_de.txt' verschoben.
-# Diese Datei hier ist veraltet. Nutze die Datei im Ordner Stoppwörter/.
-

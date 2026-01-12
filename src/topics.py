@@ -122,8 +122,13 @@ def visualize_and_save(clean_texts: List[str], count_vectorizer, count_matrix, l
         plt.tight_layout()
         plt.savefig(os.path.join(out_dir, 'wordcloud.png'), dpi=150)
         plt.close()
-    except Exception:
-        pass
+    except Exception as e:
+        try:
+            import traceback
+            print(f"WordCloud-Fehler: {e}")
+            traceback.print_exc()
+        except Exception:
+            print(f"WordCloud-Fehler: {e}")
 
     # Top-Wörter Balkendiagramm
     try:
@@ -136,15 +141,69 @@ def visualize_and_save(clean_texts: List[str], count_vectorizer, count_matrix, l
         plt.tight_layout()
         plt.savefig(os.path.join(out_dir, 'top_words.png'), dpi=150)
         plt.close()
-    except Exception:
-        pass
+    except Exception as e:
+        try:
+            import traceback
+            print(f"Top-Wörter-Plot Fehler: {e}")
+            traceback.print_exc()
+        except Exception:
+            print(f"Top-Wörter-Plot Fehler: {e}")
 
     # pyLDAvis (falls vorhanden und ein LDA-Model verfügbar ist)
     if lda_model is not None and count_vectorizer is not None:
         try:
             import pyLDAvis
-            import pyLDAvis.sklearn
-            panel = pyLDAvis.sklearn.prepare(lda_model, count_matrix, count_vectorizer)
+            try:
+                # bevorzugter Wrapper (falls vorhanden)
+                import pyLDAvis.sklearn as sklearn_vis
+                panel = sklearn_vis.prepare(lda_model, count_matrix, count_vectorizer)
+            except Exception:
+                # Fallback: manuell die Matrizen vorbereiten und pyLDAvis.prepare nutzen
+                try:
+                    import numpy as _np
+                    from scipy import sparse as _sparse
+                except Exception:
+                    _np = None
+                    _sparse = None
+
+                # topic-term distributions (n_topics x n_terms)
+                try:
+                    topic_term_dists = lda_model.components_.astype(float)
+                    topic_term_dists = topic_term_dists / topic_term_dists.sum(axis=1)[:, _np.newaxis]
+                except Exception:
+                    topic_term_dists = lda_model.components_
+
+                # document-topic distributions (n_docs x n_topics)
+                try:
+                    doc_topic_dists = lda_model.transform(count_matrix)
+                except Exception:
+                    doc_topic_dists = None
+
+                # doc lengths and term frequencies
+                try:
+                    if _sparse is not None and _sparse.issparse(count_matrix):
+                        doc_lengths = count_matrix.sum(axis=1).A1
+                        term_frequency = count_matrix.sum(axis=0).A1
+                    else:
+                        doc_lengths = _np.asarray(count_matrix.sum(axis=1)).ravel()
+                        term_frequency = _np.asarray(count_matrix.sum(axis=0)).ravel()
+                except Exception:
+                    doc_lengths = None
+                    term_frequency = None
+
+                # vocabulary
+                try:
+                    vocab = count_vectorizer.get_feature_names_out()
+                except Exception:
+                    vocab = None
+
+                panel = pyLDAvis.prepare(topic_term_dists, doc_topic_dists, doc_lengths, vocab, term_frequency)
+
             pyLDAvis.save_html(panel, os.path.join(out_dir, 'pyldavis_lda.html'))
-        except Exception:
-            pass
+        except Exception as e:
+            try:
+                import traceback
+                print(f"pyLDAvis Fehler: {e}")
+                traceback.print_exc()
+            except Exception:
+                print(f"pyLDAvis Fehler: {e}")

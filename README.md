@@ -110,8 +110,109 @@ Optional (automatische Erkennung):
 - `nltk` — Tokenisierung & Lemmatisierung
 - `gensim` — Alternative Topic-Modellierung
 
-Siehe [requirements.txt](requirements.txt).
+# Maengelmelder-Konstanz
+
+NLP-Analyse von Bürgerbeschwerden aus Konstanz.
+
+**Kurzübersicht**
+- Code befindet sich im Package `src/` (früher `nlp/`).
+- Stopwörter liegen in `Stoppwörter/stopwords_de.txt`.
+- Ergebnisse (Bilder, HTML) werden in `out/` geschrieben.
+
+**Wesentliche Funktionen**
+- Vorverarbeitung: Stopwörter, Normalisierung, optional Lemmatizer/Stemming (spaCy oder NLTK Snowball).
+- Vektorisierung: Bag-of-Words (CountVectorizer) und TF‑IDF (TfidfVectorizer).
+- Themenextraktion: LDA via scikit‑learn.
+- N‑Gram Analyse (Bigramme) und Top‑Wort‑Listen.
+- Visualisierungen: `wordcloud.png`, `top_words.png` und pyLDAvis HTML (`pyldavis_lda.html`) in `out/`.
+
+## Projektstruktur (kurz)
+
+```
+Maengelmelder-Konstanz/
+├── README.md
+├── requirements.txt
+├── data/                 # Eingabedaten (CSV)
+├── Stoppwörter/          # Deutsche Stopwörter (stopwords_de.txt)
+├── src/                  # Hauptpaket (ersetzt früheres `nlp/`)
+│   ├── fetch.py
+│   ├── preprocess.py
+│   ├── topics.py
+│   ├── utils.py
+│   └── main.py           # Orchestrator: `run()` und CLI
+├── out/                  # Ausgabe (Visualisierungen)
+└── .github/              # CI/Workflows
+```
+
+## Schnellstart
+
+### 1) Virtual Environment & Installation
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # Linux/macOS
+# .venv\\Scripts\\activate     # Windows
+python -m pip install -r requirements.txt
+```
+
+Hinweis: `spaCy` ist in `requirements.txt` enthalten, das deutsche Modell `de_core_news_sm` muss separat installiert werden, falls du spaCy-Lemmatisierung nutzen willst:
+
+```bash
+python -m spacy download de_core_news_sm
+```
+
+### 2) Ausführen
+
+Standardlauf (nutzt `data/maengelmelder_konstanz.csv`):
+
+```bash
+python -m src.main
+```
+
+Mit Optionen:
+
+```bash
+python -m src.main data/maengelmelder_konstanz.csv -t 5 -o out
+```
+
+Nach erfolgreichem Lauf findest du die Visualisierungen in `out/`:
+- `wordcloud.png`
+- `top_words.png`
+- `pyldavis_lda.html` (falls `pyLDAvis` und LDA verfügbar sind)
+
+## Hinweise zu Abhängigkeiten
+- `pandas`: optional, für bequemeres CSV-Handling
+- `scikit-learn`: für Vektorisierung und LDA
+- `nltk`: Fallback für Stemming/Lemmatisierung (Snowball)
+- `spacy`: bevorzugte Lemmatisierung (Empfohlen: `de_core_news_sm`)
+- `matplotlib`, `wordcloud`, `pyLDAvis`: Visualisierungen
+
+## Entfernte / veraltete Dateien
+- Das alte `nlp/` Package wurde in `src/` migriert.
+- Legacy‑Einstiegspunkte (`nlp_analyse.py`) und einige Root‑Skripte wurden entfernt oder ersetzt.
+
+## Entwicklung
+- Tests: `pytest`
+- Linting: `flake8`
 
 ---
 
-**Hinweis:** Alte Dateien im Root-Verzeichnis (`fetch.py`, `preprocess.py`, `topics.py`, `utils.py`, `beispieldaten.csv`) sind veraltet und können gelöscht werden.
+Wenn du möchtest, erstelle ich noch einen kurzen `CONTRIBUTING.md` mit Ablauf für lokale Tests und Pull Requests.
+
+**Notebook zur Anzeige**
+
+- In `out/` wurde ein Notebook `view_pyldavis.ipynb` hinzugefügt, das mehrere Möglichkeiten zeigt, die pyLDAvis-HTML (`out/pyldavis_lda.html`) im Notebook einzubetten oder per IFrame anzuzeigen.
+- Öffnen: `jupyter lab out/view_pyldavis.ipynb` oder in VS Code die Datei öffnen.
+- Die Zellen demonstrieren: direkte Einbettung mit `IPython.display.HTML`, IFrame-Anzeige über einen lokalen HTTP-Server und ein interaktives `ipywidgets.HTML`-Beispiel.
+
+**pyLDAvis Anzeige**
+
+- Nach einem erfolgreichen Lauf (`python -m src.main`) findest du die interaktive Visualisierung in `out/pyldavis_lda.html`.
+- Zum lokalen Betrachten empfehle ich:
+```
+python -m http.server 8000 -d out
+# dann: http://localhost:8000/pyldavis_lda.html
+```
+
+**Hinweis zu Logs**
+- Temporäre Laufprotokolle wie `run.log` wurden entfernt, damit das Repository sauber bleibt.
