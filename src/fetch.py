@@ -1,7 +1,7 @@
 """Daten laden (CSV)."""
 import csv
 from typing import List
-from nlp.utils import HAS_PANDAS
+from .utils import HAS_PANDAS
 
 if HAS_PANDAS:
     import pandas as pd
