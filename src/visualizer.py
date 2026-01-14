@@ -2,6 +2,7 @@
 import logging
 import os
 from typing import List
+import numpy as np
 from .config import Config
 
 logger = logging.getLogger(__name__)
@@ -20,10 +21,11 @@ except ImportError:
 
 try:
     import pyLDAvis
-    import pyLDAvis.sklearn
     HAS_PYLDAVIS = True
-except ImportError:
+    PYLDAVIS_IMPORT_ERROR = None
+except Exception as e:
     HAS_PYLDAVIS = False
+    PYLDAVIS_IMPORT_ERROR = e
 
 
 class Visualizer:
@@ -84,20 +86,48 @@ class Visualizer:
     def create_pyldavis(self, lda_model, count_matrix, count_vectorizer, filename: str = "lda_interactive.html"):
         """Erstelle pyLDAvis Visualisierung."""
         if not HAS_PYLDAVIS:
-            logger.warning("pyLDAvis nicht verfügbar")
+            reason = f" (Grund: {PYLDAVIS_IMPORT_ERROR})" if 'PYLDAVIS_IMPORT_ERROR' in globals() and PYLDAVIS_IMPORT_ERROR else ""
+            logger.warning(
+                "pyLDAvis nicht verfügbar. Installiere mit: pip install pyLDAvis" + reason
+            )
             return
         
         logger.info("Erstelle pyLDAvis Visualisierung...")
         
         try:
-            panel = pyLDAvis.sklearn.prepare(
-                lda_model,
-                count_matrix,
-                count_vectorizer,
-                mds=Config.PYLDAVIS_MDS
-            )
+            try:
+                # Bevorzugt sklearn-Helper, falls vorhanden
+                from pyLDAvis import sklearn as pyldavis_sklearn
+                panel = pyldavis_sklearn.prepare(
+                    lda_model,
+                    count_matrix,
+                    count_vectorizer,
+                    mds=Config.PYLDAVIS_MDS
+                )
+            except Exception as inner_e:
+                logger.info(f"pyLDAvis.sklearn nicht verfügbar, nutze manuelles prepare: {inner_e}")
+                # Manuelle Vorbereitung
+                doc_topic_dists = lda_model.transform(count_matrix)
+                topic_term_dists = lda_model.components_.astype(float)
+                # Normalisiere Verteilungen
+                topic_term_dists /= topic_term_dists.sum(axis=1, keepdims=True)
+                doc_topic_sums = doc_topic_dists.sum(axis=1, keepdims=True)
+                doc_topic_sums[doc_topic_sums == 0] = 1.0
+                doc_topic_dists = doc_topic_dists / doc_topic_sums
+                vocab = count_vectorizer.get_feature_names_out()
+                term_frequency = count_matrix.sum(axis=0).A1
+                doc_lengths = count_matrix.sum(axis=1).A1
+                panel = pyLDAvis.prepare(
+                    topic_term_dists,
+                    doc_topic_dists,
+                    doc_lengths,
+                    vocab,
+                    term_frequency,
+                    mds=Config.PYLDAVIS_MDS
+                )
             
             path = Config.REPORTS_DIR / filename
+            path.parent.mkdir(parents=True, exist_ok=True)
             pyLDAvis.save_html(panel, str(path))
             
             logger.info(f"✓ pyLDAvis gespeichert: {path}")

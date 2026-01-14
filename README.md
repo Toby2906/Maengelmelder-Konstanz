@@ -24,6 +24,8 @@ python -m venv .venv
 source .venv/bin/activate  # Mac/Linux
 pip install -r requirements.txt
 python -m spacy download de_core_news_sm
+# Optional interaktive Topics (pyLDAvis):
+pip install pyLDAvis  # falls nicht schon installiert
 
 # 2. Daten ablegen
 # Kopiere CSV nach: data/raw/maengelmelder_konstanz.csv
@@ -46,6 +48,8 @@ python main.py --input data/raw/meine_daten.csv --topics 7
 
 # Hilfe
 python main.py --help
+
+Hinweis: Fehlt das spaCy-Modell `de_core_news_sm`, versucht das Skript den Download automatisch. Ohne spaCy fällt die Lemmatisierung auf den NLTK-Stemmer zurück.
 ```
 
 ## 🛠️ Software-Stack

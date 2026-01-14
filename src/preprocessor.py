@@ -89,11 +89,8 @@ class Preprocessor:
         if Config.USE_LEMMATIZATION:
             # Versuche spaCy
             if HAS_SPACY:
-                try:
-                    nlp = spacy.load(
-                        Config.SPACY_MODEL,
-                        exclude=Config.SPACY_DISABLE
-                    )
+                nlp = self._load_spacy_model()
+                if nlp is not None:
                     
                     class SpacyLemmatizer:
                         def __init__(self, nlp_model):
@@ -101,20 +98,18 @@ class Preprocessor:
                         
                         def lemmatize(self, word: str) -> str:
                             try:
-                                doc = self.nlp.make_doc(word)
-                                return doc[0].lemma_ if len(doc) > 0 else word
+                                # make_doc tokenisiert nur; für Lemmas braucht es Pipeline-Ausführung
+                                doc = self.nlp(word)
+                                if len(doc) == 0:
+                                    return word
+                                lemma = doc[0].lemma_
+                                return lemma if lemma else word
                             except:
                                 return word
                     
                     self.lemmatizer = SpacyLemmatizer(nlp)
                     logger.info(f"✓ spaCy Lemmatizer initialisiert ({Config.SPACY_MODEL})")
                     return
-                    
-                except OSError:
-                    logger.warning(
-                        f"spaCy Modell '{Config.SPACY_MODEL}' nicht gefunden. "
-                        f"Installiere mit: python -m spacy download {Config.SPACY_MODEL}"
-                    )
             
             # Fallback: NLTK Stemmer
             if HAS_NLTK:
@@ -144,6 +139,35 @@ class Preprocessor:
         
         self.lemmatizer = IdentityLemmatizer()
         logger.info("ℹ Keine Lemmatisierung (Identity)")
+
+    def _load_spacy_model(self):
+        """Lade spaCy Modell mit optionalem Auto-Download."""
+        try:
+            return spacy.load(
+                Config.SPACY_MODEL,
+                exclude=Config.SPACY_DISABLE
+            )
+        except OSError:
+            logger.warning(
+                f"spaCy Modell '{Config.SPACY_MODEL}' nicht gefunden. "
+                f"Versuche automatischen Download..."
+            )
+            try:
+                from spacy.cli import download
+                download(Config.SPACY_MODEL)
+                return spacy.load(
+                    Config.SPACY_MODEL,
+                    exclude=Config.SPACY_DISABLE
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Automatischer Download für '{Config.SPACY_MODEL}' fehlgeschlagen: {e}. "
+                    f"Installiere manuell mit: python -m spacy download {Config.SPACY_MODEL}"
+                )
+                return None
+        except Exception as e:
+            logger.warning(f"spaCy konnte nicht initialisiert werden: {e}")
+            return None
     
     def preprocess(self, text: str) -> str:
         """Vorverarbeite einen Text.
@@ -190,6 +214,8 @@ class Preprocessor:
             # Lemmatisierung
             if self.lemmatizer:
                 token = self.lemmatizer.lemmatize(token)
+                if not token or not token.strip():
+                    continue
             
             processed_tokens.append(token)
         
