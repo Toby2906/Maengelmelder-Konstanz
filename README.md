@@ -139,9 +139,6 @@ python main.py --optimize-topics --min-topics 2 --max-topics 20
 # Verwende vorher ermitteltes optimales k
 python main.py --topics 7
 
-# Für wissenschaftliche Publikationen
-```
-
 ## 📈 Coherence Score Interpretation
 
 Der Coherence Score (c_v metric) misst die semantische Kohärenz von Topics:
@@ -264,41 +261,3 @@ pytest --cov=src --cov-report=html
 - Erste Analyse: `--optimize-topics` (schnell, nur k-Bestimmung)
 - Produktion: `--topics K` mit ermitteltem k (schnell, reproduzierbar)
 - Exploration: `--auto-optimize` (komplett, inkl. k-Optimierung)
-
-## 🤝 Beitragen
-
-Contributions willkommen! Siehe [CONTRIBUTING.md](CONTRIBUTING.md)
-
-### Geplante Features
-- [ ] Alternative Coherence Metrics (u_mass, c_npmi)
-- [ ] Parallele Verarbeitung für große Datensätze
-- [ ] Web-Interface für interaktive Analyse
-- [ ] Export als LaTeX-Tabelle
-
-## 📄 Lizenz
-
-MIT License - siehe [LICENSE](LICENSE)
-
-## 📞 Kontakt
-
-**Autor**: Tobias Seekatz  
-**Projekt**: Data Analysis (DLBDSEDA02_D)  
-**GitHub**: [@Toby2906](https://github.com/Toby2906)
-
----
-
-## 🆕 Changelog
-
-### Version 1.1.0 (2025-01-19)
-- ✨ **NEU**: Automatische Topic-Anzahl Optimierung mit Coherence Score
-- ✨ **NEU**: gensim Integration für c_v metric
-- ✨ **NEU**: Coherence Score Visualisierung
-- ✨ **NEU**: `--auto-optimize` und `--optimize-topics` CLI-Optionen
-- 📈 Verbesserte Dokumentation mit wissenschaftlichem Kontext
-- 🐛 Bugfixes in Vorverarbeitung
-
-### Version 1.0.0 (2025-01-13)
-- 🎉 Initial Release
-- ✅ Basis NLP-Pipeline
-- ✅ LDA Topic Modeling
-- ✅ Visualisierungen
