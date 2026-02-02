@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "analysis_date": "2026-02-02 06:41:13",
+    "n_topics_used": 2,
+    "optimized": true
+  },
+  "data_statistics": {
+    "total_texts": 2132,
+    "avg_length": 133.74015009380864,
+    "min_length": 2,
+    "max_length": 1712,
+    "avg_words": 18.369136960600375,
+    "min_words": 1,
+    "max_words": 227
+  },
+  "preprocessing_statistics": {
+    "total_texts": 2127,
+    "total_tokens": 20015,
+    "unique_tokens": 5558,
+    "avg_tokens_per_text": 9.409967089797837,
+    "vocabulary_richness": 0.2776917312015988
+  },
+  "topics": {
+    "Thema 1": [
+      "stehen",
+      "liegen",
+      "muell",
+      "strasse",
+      "fahrrad",
+      "schild",
+      "dort",
+      "richtung",
+      "wasser",
+      "dieser"
+    ],
+    "Thema 2": [
+      "defekt",
+      "strassenlatern",
+      "laterne",
+      "lampen",
+      "radweg",
+      "strasse",
+      "str",
+      "haus",
+      "fussgaeng",
+      "brennen"
+    ]
+  },
+  "top_bigrams": {
+    "strassenlatern defekt": 54,
+    "lampen defekt": 42,
+    "laterne defekt": 26,
+    "strassenlatern haus": 24,
+    "haus brennen": 22,
+    "illegal muell": 22,
+    "fussgaeng radfahr": 16,
+    "lampen brennen": 15,
+    "strasse stehen": 15,
+    "fuss radweg": 14,
+    "peter thumb": 13,
+    "laterne nummer": 13,
+    "gegenueber haus": 13,
+    "strassenlatern funktion": 13,
+    "strassenlatern gegenueber": 11
+  },
+  "top_words": {
+    "defekt": 358,
+    "stehen": 248,
+    "strasse": 242,
+    "Strassenlatern": 236,
+    "liegen": 187,
+    "muell": 163,
+    "Laterne": 121,
+    "lampen": 121,
+    "Fahrrad": 115,
+    "Haus": 96,
+    "Radweg": 94,
+    "str": 90,
+    "Gehweg": 90,
+    "Richtung": 83,
+    "fussgaeng": 79,
+    "brennen": 75,
+    "Ecke": 73,
+    "dort": 71,
+    "leuchten": 71,
+    "fussweg": 69
+  },
+  "topic_optimization": {
+    "optimal_k": 2,
+    "coherence_scores": {
+      "2": 0.5895710362891479,
+      "3": 0.5323142480197992,
+      "4": 0.5459637599728155,
+      "5": 0.5198168199057766,
+      "6": 0.5523737695666338,
+      "7": 0.5671695735119593,
+      "8": 0.5352472139564521,
+      "9": 0.5547764450451518,
+      "10": 0.571719701755762,
+      "11": 0.5586499137638565,
+      "12": 0.5517243174261023,
+      "13": 0.5615745777043023,
+      "14": 0.5641770730052754,
+      "15": 0.5442579866026551
+    },
+    "recommendation": "Exzellente Themen-Kohärenz"
+  }
+}

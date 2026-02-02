@@ -12,7 +12,6 @@ htmlcov/
 .idea/
 *.swp
 .DS_Store
-output/
 data/raw/*.csv
 *.log
 .env
